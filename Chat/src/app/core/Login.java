@@ -1,6 +1,7 @@
 package app.core;
 
 import java.awt.EventQueue;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -44,12 +45,12 @@ public class Login extends JFrame {
 	 * Create the frame.
 	 */
 	public Login() {
+		setFont(new Font("Segoe UI", Font.PLAIN, 12));
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
 		setResizable(false);
 		setTitle("Login");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -61,33 +62,40 @@ public class Login extends JFrame {
 		contentPane.setLayout(null);
 
 		txtName = new JTextField();
+		txtName.setFont(new Font("Segoe UI", Font.PLAIN, 12));
 		txtName.setBounds(69, 50, 145, 20);
 		contentPane.add(txtName);
 		txtName.setColumns(10);
 
 		JLabel lblForName = new JLabel("Name:");
+		lblForName.setFont(new Font("Segoe UI", Font.PLAIN, 12));
 		lblForName.setBounds(121, 30, 42, 14);
 		contentPane.add(lblForName);
 
 		txtAddress = new JTextField();
+		txtAddress.setFont(new Font("Segoe UI", Font.PLAIN, 12));
 		txtAddress.setBounds(69, 115, 145, 20);
 		contentPane.add(txtAddress);
 		txtAddress.setColumns(10);
 
 		lblIpAddress = new JLabel("IP Address:");
+		lblIpAddress.setFont(new Font("Segoe UI", Font.PLAIN, 12));
 		lblIpAddress.setBounds(107, 95, 69, 14);
 		contentPane.add(lblIpAddress);
 
 		txtPort = new JTextField();
+		txtPort.setFont(new Font("Segoe UI", Font.PLAIN, 12));
 		txtPort.setColumns(10);
 		txtPort.setBounds(69, 180, 145, 20);
 		contentPane.add(txtPort);
 
 		lblPort = new JLabel("Port:");
+		lblPort.setFont(new Font("Segoe UI", Font.PLAIN, 12));
 		lblPort.setBounds(121, 160, 42, 14);
 		contentPane.add(lblPort);
 
 		btnLogin = new JButton("Login");
+		btnLogin.setFont(new Font("Segoe UI", Font.PLAIN, 12));
 		btnLogin.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {

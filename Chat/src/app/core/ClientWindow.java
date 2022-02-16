@@ -58,7 +58,7 @@ public class ClientWindow extends JFrame implements Runnable {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		setTitle("Chat Client");
+		setTitle("Chat Client - " + client.getName());
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setSize(880, 550);
 		setLocationRelativeTo(null);
@@ -74,7 +74,7 @@ public class ClientWindow extends JFrame implements Runnable {
 		contentPane.setLayout(gbl_contentPane);
 
 		history = new JTextArea();
-		history.setFont(new Font("Segoe UI", Font.PLAIN, 18));
+		history.setFont(new Font("SansSerif", Font.PLAIN, 14));
 		history.setEditable(false);
 		caret = (DefaultCaret) history.getCaret();
 		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
@@ -89,6 +89,7 @@ public class ClientWindow extends JFrame implements Runnable {
 		contentPane.add(scroll, scrollConstraints);
 
 		txtMessage = new JTextField();
+		txtMessage.setFont(new Font("Segoe UI", Font.PLAIN, 12));
 		txtMessage.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyPressed(KeyEvent e) {
@@ -107,6 +108,7 @@ public class ClientWindow extends JFrame implements Runnable {
 		txtMessage.setColumns(10);
 
 		JButton btnSend = new JButton("Send");
+		btnSend.setFont(new Font("Segoe UI", Font.PLAIN, 12));
 		btnSend.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -134,7 +136,6 @@ public class ClientWindow extends JFrame implements Runnable {
 			return;
 		}
 		message = client.getName() + ": " + message;
-		console(message);
 		message = "/m/" + message;
 		client.send(message.getBytes());
 		txtMessage.setText("");
@@ -149,6 +150,9 @@ public class ClientWindow extends JFrame implements Runnable {
 					if (message.startsWith("/c/")) {
 						client.setID(Integer.parseInt(message.split("/c/|/e/")[1]));
 						console("Successfully connected to server! ID: " + client.getID());
+					} else if (message.startsWith("/m/")) {
+						String text = message.split("/m/|/e/")[1];
+						console(text);
 					}
 				}
 			}
