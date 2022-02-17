@@ -86,4 +86,16 @@ public class Client {
 		send.start();
 	}
 
+	public void close() {
+		new Thread() {
+			@Override
+			public void run() {
+				synchronized (socket) {
+					socket.disconnect();
+					socket.close();
+				}
+			}
+		}.start();
+	}
+
 }

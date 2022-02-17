@@ -103,17 +103,39 @@ public class Server implements Runnable {
 		if (string.startsWith("/c/")) {
 			// UUID id = UUID.randomUUID();
 			int id = UniqueIdentifier.getIdentifier();
-			System.out.println("Identifier: " + id);
-			clients.add(
-					new ServerClient(string.substring(3, string.length()), packet.getAddress(), packet.getPort(), id));
-			System.out.println(string.substring(3, string.length()));
+			String name = string.split("/c/|/e/")[1].trim();
+			System.out.println(name + "(" + id + ") connected!");
+			clients.add(new ServerClient(name, packet.getAddress(), packet.getPort(), id));
 			String ID = "/c/" + id;
 			send(ID, packet.getAddress(), packet.getPort());
 		} else if (string.startsWith("/m/")) {
 			sendToAll(string);
+		} else if (string.startsWith("/d/")) {
+			String id = string.split("/d/|/e/")[1];
+			disconnect(Integer.parseInt(id), true);
 		} else {
 			System.out.println(string);
 		}
+	}
+
+	private void disconnect(int id, boolean status) {
+		ServerClient c = null;
+		for (int i = 0; i < clients.size(); i++) {
+			if (clients.get(i).getID() == id) {
+				c = clients.get(i);
+				clients.remove(i);
+				break;
+			}
+		}
+		String message = "";
+		if (status) {
+			message = "Client " + c.name + " (" + c.getID() + ") @ " + c.address.toString() + ":" + c.port
+					+ " disconnected.";
+		} else {
+			message = "Client " + c.name + " (" + c.getID() + ") @ " + c.address.toString() + ":" + c.port
+					+ " timed out.";
+		}
+		System.out.println(message);
 	}
 
 }
