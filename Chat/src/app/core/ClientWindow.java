@@ -28,8 +28,7 @@ public class ClientWindow extends JFrame implements Runnable {
 	private JTextField txtMessage;
 	private JTextArea history;
 	private DefaultCaret caret;
-	private Thread listen;
-	private Thread run;
+	private Thread listen, run;
 	private Client client;
 
 	private boolean running = false;
@@ -47,7 +46,7 @@ public class ClientWindow extends JFrame implements Runnable {
 		}
 		createWindow();
 		console("Attempting a connection to " + address + ":" + port + ", user: " + name);
-		String connection = "/c/" + name;
+		String connection = "/c/" + name + "/e/";
 		client.send(connection.getBytes());
 		running = true;
 		run = new Thread(this, "Running");

@@ -7,6 +7,7 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 public class Server implements Runnable {
 
@@ -16,12 +17,10 @@ public class Server implements Runnable {
 	private DatagramSocket socket;
 	private int port;
 	private boolean running = false;
-	private Thread run;
-	private Thread manage;
-	private Thread send;
-	private Thread receive;
-
+	private Thread run, manage, send, receive;
 	private final int MAX_ATTEMPTS = 5;
+
+	private boolean raw = false;
 
 	public Server(int port) {
 		this.port = port;
@@ -41,6 +40,27 @@ public class Server implements Runnable {
 		System.out.println("Server started on port " + port);
 		manageClients();
 		receive();
+		Scanner scanner = new Scanner(System.in);
+		while (running) {
+			String text = scanner.nextLine();
+			if (!text.startsWith("/")) {
+				sendToAll("/m/Server: " + text + "/e/");
+				continue;
+			}
+			text = text.substring(1);
+			if (text.equals("raw")) {
+				raw = !raw;
+			} else if (text.equals("clients")) {
+				System.out.println("Clients:");
+				System.out.println("========");
+				for (int i = 0; i < clients.size(); i++) {
+					ServerClient c = clients.get(i);
+					System.out.println(c.name + "(" + c.getID() + "): " + c.address.toString() + ":" + c.port);
+				}
+				System.out.println("========");
+			}
+		}
+		scanner.close();
 	}
 
 	private void manageClients() {
@@ -93,6 +113,11 @@ public class Server implements Runnable {
 	}
 
 	private void sendToAll(String message) {
+		if (message.startsWith("/m/")) {
+			String text = message.substring(3);
+			text = text.split("/e/")[0];
+			System.out.println(text);
+		}
 		for (int i = 0; i < clients.size(); i++) {
 			ServerClient client = clients.get(i);
 			send(message.getBytes(), client.address, client.port);
@@ -121,6 +146,9 @@ public class Server implements Runnable {
 
 	private void process(DatagramPacket packet) {
 		String string = new String(packet.getData());
+		if (raw) {
+			System.out.println(string);
+		}
 		if (string.startsWith("/c/")) {
 			// UUID id = UUID.randomUUID();
 			int id = UniqueIdentifier.getIdentifier();
