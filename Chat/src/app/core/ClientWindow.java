@@ -148,7 +148,7 @@ public class ClientWindow extends JFrame implements Runnable {
 		}
 		if (text) {
 			message = client.getName() + ": " + message;
-			message = "/m/" + message;
+			message = "/m/" + message + "/e/";
 			txtMessage.setText("");
 		}
 		client.send(message.getBytes());

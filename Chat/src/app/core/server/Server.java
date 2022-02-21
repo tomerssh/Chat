@@ -58,6 +58,37 @@ public class Server implements Runnable {
 					System.out.println(c.name + "(" + c.getID() + "): " + c.address.toString() + ":" + c.port);
 				}
 				System.out.println("========");
+			} else if (text.startsWith("kick")) {
+				String identifier = text.split(" ")[1];
+				int id = -1;
+				boolean number = true;
+				try {
+					id = Integer.parseInt(identifier);
+				} catch (NumberFormatException e) {
+					number = false;
+				}
+				if (number) {
+					boolean exists = false;
+					for (int i = 0; i < clients.size(); i++) {
+						if (clients.get(i).getID() == id) {
+							exists = true;
+							break;
+						}
+					}
+					if (exists) {
+						disconnect(id, true);
+					} else {
+						System.out.println("Client " + id + " doesn't exist! Check ID number.");
+					}
+				} else {
+					for (int i = 0; i < clients.size(); i++) {
+						ServerClient c = clients.get(i);
+						if (identifier.equals(c.name)) {
+							disconnect(c.getID(), true);
+							break;
+						}
+					}
+				}
 			}
 		}
 		scanner.close();
@@ -114,8 +145,7 @@ public class Server implements Runnable {
 
 	private void sendToAll(String message) {
 		if (message.startsWith("/m/")) {
-			String text = message.substring(3);
-			text = text.split("/e/")[0];
+			String text = message.split("/m/|/e/")[1];
 			System.out.println(text);
 		}
 		for (int i = 0; i < clients.size(); i++) {
@@ -152,7 +182,7 @@ public class Server implements Runnable {
 		if (string.startsWith("/c/")) {
 			// UUID id = UUID.randomUUID();
 			int id = UniqueIdentifier.getIdentifier();
-			String name = string.split("/c/|/e/")[1].trim();
+			String name = string.split("/c/|/e/")[1];
 			System.out.println(name + "(" + id + ") connected!");
 			clients.add(new ServerClient(name, packet.getAddress(), packet.getPort(), id));
 			String ID = "/c/" + id;
@@ -171,12 +201,17 @@ public class Server implements Runnable {
 
 	private void disconnect(int id, boolean status) {
 		ServerClient c = null;
+		boolean existed = false;
 		for (int i = 0; i < clients.size(); i++) {
 			if (clients.get(i).getID() == id) {
 				c = clients.get(i);
 				clients.remove(i);
+				existed = true;
 				break;
 			}
+		}
+		if (!existed) {
+			return;
 		}
 		if (c != null) {
 			String message = "";
