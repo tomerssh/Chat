@@ -10,9 +10,13 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.Arrays;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -32,6 +36,12 @@ public class ClientWindow extends JFrame implements Runnable {
 	private Client client;
 
 	private boolean running = false;
+	private JMenuBar menuBar;
+	private JMenu mnFile;
+	private JMenuItem mntmOnlineUsers;
+	private JMenuItem mntmExit;
+
+	private OnlineUsers users;
 
 	/**
 	 * Create the frame.
@@ -48,6 +58,7 @@ public class ClientWindow extends JFrame implements Runnable {
 		console("Attempting a connection to " + address + ":" + port + ", user: " + name);
 		String connection = "/c/" + name + "/e/";
 		client.send(connection.getBytes());
+		users = new OnlineUsers();
 		running = true;
 		run = new Thread(this, "Running");
 		run.start();
@@ -63,15 +74,32 @@ public class ClientWindow extends JFrame implements Runnable {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setSize(880, 550);
 		setLocationRelativeTo(null);
+
+		menuBar = new JMenuBar();
+		setJMenuBar(menuBar);
+
+		mnFile = new JMenu("File");
+		menuBar.add(mnFile);
+
+		mntmOnlineUsers = new JMenuItem("Online Users");
+		mntmOnlineUsers.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				users.setVisible(true);
+			}
+		});
+		mnFile.add(mntmOnlineUsers);
+
+		mntmExit = new JMenuItem("Exit");
+		mnFile.add(mntmExit);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 
 		GridBagLayout gbl_contentPane = new GridBagLayout();
-		gbl_contentPane.columnWidths = new int[] { 10, 810, 30, 10 };
-		gbl_contentPane.rowHeights = new int[] { 35, 460, 35 };
-		gbl_contentPane.columnWeights = new double[] { 1.0, 1.0 };
-		gbl_contentPane.rowWeights = new double[] { 1.0, Double.MIN_VALUE };
+		gbl_contentPane.columnWidths = new int[] { 10, 810, 30, 10 }; // SUM = 880
+//		gbl_contentPane.rowHeights = new int[] { 35, 460, 35 }; // SUM = 550
+		gbl_contentPane.rowHeights = new int[] { 25, 470, 35 }; // SUM = 550
 		contentPane.setLayout(gbl_contentPane);
 
 		history = new JTextArea();
@@ -87,6 +115,8 @@ public class ClientWindow extends JFrame implements Runnable {
 		scrollConstraints.gridy = 0;
 		scrollConstraints.gridwidth = 3;
 		scrollConstraints.gridheight = 2;
+		scrollConstraints.weightx = 1;
+		scrollConstraints.weighty = 1;
 		contentPane.add(scroll, scrollConstraints);
 
 		txtMessage = new JTextField();
@@ -105,6 +135,8 @@ public class ClientWindow extends JFrame implements Runnable {
 		gbc_txtMessage.gridx = 0;
 		gbc_txtMessage.gridy = 2;
 		gbc_txtMessage.gridwidth = 2;
+		gbc_txtMessage.weightx = 1;
+		gbc_txtMessage.weighty = 0;
 		contentPane.add(txtMessage, gbc_txtMessage);
 		txtMessage.setColumns(10);
 
@@ -120,6 +152,8 @@ public class ClientWindow extends JFrame implements Runnable {
 		gbc_btnSend.insets = new Insets(0, 0, 0, 5);
 		gbc_btnSend.gridx = 2;
 		gbc_btnSend.gridy = 2;
+		gbc_btnSend.weightx = 0;
+		gbc_btnSend.weighty = 0;
 		contentPane.add(btnSend, gbc_btnSend);
 
 		addWindowListener(new WindowAdapter() {
@@ -170,6 +204,9 @@ public class ClientWindow extends JFrame implements Runnable {
 					} else if (message.startsWith("/i/")) {
 						String text = "/i/" + client.getID() + "/e/";
 						send(text, false);
+					} else if (message.startsWith("/u/")) {
+						String[] users = message.split("/u/|/n/|/e/");
+						ClientWindow.this.users.update(Arrays.copyOfRange(users, 1, users.length - 1));
 					}
 				}
 			}

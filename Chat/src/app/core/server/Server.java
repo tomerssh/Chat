@@ -49,6 +49,11 @@ public class Server implements Runnable {
 			}
 			text = text.substring(1);
 			if (text.equals("raw")) {
+				if (raw) {
+					System.out.println("Raw mode off.");
+				} else {
+					System.out.println("Raw mode on.");
+				}
 				raw = !raw;
 			} else if (text.equals("clients")) {
 				System.out.println("Clients:");
@@ -89,9 +94,26 @@ public class Server implements Runnable {
 						}
 					}
 				}
+			} else if (text.equals("help")) {
+				printHelp();
+			} else if (text.equals("quit")) {
+				quit();
+			} else {
+				System.out.println("Unknown command.");
+				System.out.println("/help to see a list of all avaliable commands.");
 			}
 		}
 		scanner.close();
+	}
+
+	private void printHelp() {
+		System.out.println("Here is a list of all avaliable commands:");
+		System.out.println("=========================================");
+		System.out.println("/raw - enables raw mode.");
+		System.out.println("/clients - shows all connected clients.");
+		System.out.println("/kick [users ID or username] - kicks the specified user.");
+		System.out.println("/help - shows this help message.");
+		System.out.println("/quit - shuts down the server.");
 	}
 
 	private void manageClients() {
@@ -100,6 +122,7 @@ public class Server implements Runnable {
 			public void run() {
 				while (running) {
 					sendToAll("/i/server");
+					sendStatus();
 					try {
 						Thread.sleep(2000);
 					} catch (InterruptedException e) {
@@ -122,6 +145,18 @@ public class Server implements Runnable {
 			}
 		};
 		manage.start();
+	}
+
+	private void sendStatus() {
+		if (clients.size() <= 0) {
+			return;
+		}
+		String users = "/u/";
+		for (int i = 0; i < clients.size() - 1; i++) {
+			users += clients.get(i).name + "/n/";
+		}
+		users += clients.get(clients.size() - 1).name + "/e/";
+		sendToAll(users);
 	}
 
 	private void receive() {
@@ -196,6 +231,18 @@ public class Server implements Runnable {
 			clientResponse.add(Integer.parseInt(string.split("/i/|/e/")[1]));
 		} else {
 			System.out.println(string);
+		}
+	}
+
+	private void quit() {
+		while (clients.size() != 0) {
+			disconnect(clients.get(0).getID(), true);
+		}
+		running = false;
+		try {
+			socket.disconnect();
+		} finally {
+			socket.close();
 		}
 	}
 

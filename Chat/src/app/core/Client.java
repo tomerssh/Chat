@@ -12,8 +12,7 @@ public class Client {
 
 	private DatagramSocket socket;
 
-	private String name;
-	private String address;
+	private String name, address;
 	private int port;
 	private InetAddress ip;
 	private Thread send;
@@ -59,7 +58,7 @@ public class Client {
 		return true;
 	}
 
-	public String receive() {
+	public synchronized String receive() {
 		byte[] data = new byte[1024];
 		DatagramPacket packet = new DatagramPacket(data, data.length);
 		try {
@@ -91,8 +90,11 @@ public class Client {
 			@Override
 			public void run() {
 				synchronized (socket) {
-					socket.disconnect();
-					socket.close();
+					try {
+						socket.disconnect();
+					} finally {
+						socket.close();
+					}
 				}
 			}
 		}.start();
